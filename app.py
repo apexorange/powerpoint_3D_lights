@@ -2,6 +2,7 @@ import zipfile
 import os
 from lxml import etree
 
+input_file_root_name = "controller"
 
 def unzip_pptx(file_path, extract_path):
     with zipfile.ZipFile(file_path, 'r') as zip_ref:
@@ -22,9 +23,9 @@ def update_rgb_values(root, element_tag, position, r, g, b):
         elem = elements[position - 1]  # Adjust for zero-based index
         scrgbClr = elem.find('.//a:scrgbClr', namespaces=root.nsmap)
         if scrgbClr is not None:
-            scrgbClr.set('r', str(int(r * 1000)))
-            scrgbClr.set('g', str(int(g * 1000)))
-            scrgbClr.set('b', str(int(b * 1000)))
+            scrgbClr.set('r', str(int(r * 100)))
+            scrgbClr.set('g', str(int(g * 100)))
+            scrgbClr.set('b', str(int(b * 100)))
             print(f"Updated {element_tag} at position {position} to r={r}, g={g}, b={b}")
         else:
             print(f"a:scrgbClr not found in {element_tag} at position {position}")
@@ -41,7 +42,7 @@ def update_intensity(root, element_tag, position, percentage):
         intensity = elem.find('.//am3d:intensity', namespaces=namespaces)
         if intensity is not None:
             # Convert percentage to n and d values
-            n = int(percentage * 1000000)
+            n = int(percentage * 100000)
             d = 1000000
             intensity.set('n', str(n))
             intensity.set('d', str(d))
@@ -65,7 +66,7 @@ def update_ambient_light_intensity(root, position, percentage):
         illuminance = elem.find('.//am3d:illuminance', namespaces=namespaces)
         if illuminance is not None:
             # Convert percentage to n and d values
-            n = int(percentage * 1000000)
+            n = int(percentage * 100000)
             d = 1000000
             illuminance.set('n', str(n))
             illuminance.set('d', str(d))
@@ -90,10 +91,10 @@ def repack_pptx(extract_path: str, output_path: str):
 
 
 # Paths
-pptx_path = 'demo.pptx'
+pptx_path = f'{input_file_root_name}.pptx'
 extract_path = 'extracted/'
 slide_xml_path = os.path.join(extract_path, 'ppt/slides/slide1.xml')
-new_pptx_path = 'demo_edited.pptx'
+new_pptx_path = f'{input_file_root_name}_edited.pptx'
 
 # Process
 unzip_pptx(pptx_path, extract_path)
@@ -116,16 +117,16 @@ for i, elem in enumerate(elements_pt_light, start=1):
     print(f"{i}: {etree.tostring(elem, pretty_print=True).decode('utf-8')}")
 
 # Update RGB values and intensity for point lights
-update_rgb_values(root, 'am3d:ptLight', 1, 255, 0, 0)  # Example: Update 1st ptLight to red
-update_rgb_values(root, 'am3d:ptLight', 2, 80, 25, 0)  # Example: Update 2nd ptLight to green
-update_rgb_values(root, 'am3d:ptLight', 3, 0, 0, 255)  # Example: Update 3rd ptLight to blue
+update_rgb_values(root, 'am3d:ptLight', 1, 0, 0, 500)  # Example: Update 1st ptLight to red
+update_rgb_values(root, 'am3d:ptLight', 2, 500, 500, 500)  # Example: Update 2nd ptLight to green
+update_rgb_values(root, 'am3d:ptLight', 3, 200, 0, 0)  # Example: Update 3rd ptLight to blue
 
-update_intensity(root, 'am3d:ptLight', 1, 75)  # Example: Update 1st ptLight to 75% brightness
-update_intensity(root, 'am3d:ptLight', 2, 50)  # Example: Update 2nd ptLight to 50% brightness
-update_intensity(root, 'am3d:ptLight', 3, 25)  # Example: Update 3rd ptLight to 25% brightness
+update_intensity(root, 'am3d:ptLight', 1, 100)  # Example: Update 1st ptLight to 75% brightness
+update_intensity(root, 'am3d:ptLight', 2, 300)  # Example: Update 2nd ptLight to 50% brightness
+update_intensity(root, 'am3d:ptLight', 3, 100)  # Example: Update 3rd ptLight to 25% brightness
 
 # Update RGB values and intensity for ambient light
-update_ambient_light_rgb(root, 1, 5, 5, 5)  # Example: Update ambientLight to gray
+update_ambient_light_rgb(root, 1, 180, 180, 180)  # Example: Update ambientLight to gray
 update_ambient_light_intensity(root, 1, 10)  # Example: Update ambientLight to 60% brightness
 
 # Save the modified XML
